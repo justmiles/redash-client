@@ -1,7 +1,6 @@
 package redash
 
 import "fmt"
-import "errors"
 import "strconv"
 
 // Query is returned for all /api/queries
@@ -81,7 +80,7 @@ func (c *Client) DownloadResults(q Query, filelocation, filetype string) (err er
 		filetype = "xlsx"
 	}
 	if filetype != "xlsx" && filetype != "csv" {
-		return errors.New(fmt.Sprintf(`Unable to download file of type "%s". Please specify "xlsx" or "csv"`, filetype))
+		return fmt.Errorf(`unable to download file of type "%s". Please specify "xlsx" or "csv"`, filetype)
 	}
 	req, err := c.newRequest("GET", fmt.Sprintf("/api/queries/%d/results/%d.%s", q.ID, q.LatestQueryDataID, filetype), nil, nil)
 	if err != nil {

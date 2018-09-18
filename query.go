@@ -41,17 +41,47 @@ type ListQueriesResponse struct {
 	Results  []Query `json:"results"`
 }
 
-func (c *Client) ListQueries() (p ListQueriesResponse, err error) {
+// ListQueries does that
+func (c *Client) ListQueries() (queries []Query, err error) {
+	var p ListQueriesResponse
+	var total = 1
 
-	req, err := c.newRequest("GET", "/api/queries", nil, nil)
-	if err != nil {
-		return p, err
+	for len(queries) < total {
+
+		req, err := c.newRequest("GET", "/api/queries", nil, nil)
+		if err != nil {
+			return queries, err
+		}
+		_, err = c.do(req, &p)
+		if err != nil {
+			return queries, err
+		}
+		total = p.Count
+		queries = append(queries, p.Results...)
+		fmt.Println(len(queries))
 	}
-	_, err = c.do(req, &p)
-	if err != nil {
-		return p, err
+	return queries, nil
+}
+
+func (c *Client) ListQueriesWithPagination() (queries []Query, err error) {
+	var p ListQueriesResponse
+	var total = 1
+
+	for len(queries) < total {
+
+		req, err := c.newRequest("GET", "/api/queries", nil, nil)
+		if err != nil {
+			return queries, err
+		}
+		_, err = c.do(req, &p)
+		if err != nil {
+			return queries, err
+		}
+		total = p.Count
+		queries = append(queries, p.Results...)
+		fmt.Println(len(queries))
 	}
-	return p, nil
+	return queries, nil
 }
 
 // SearchQueries searches Redash for queries
@@ -74,7 +104,7 @@ func (c *Client) SearchQueries(q string, drafts bool) (p []Query, err error) {
 	return p, nil
 }
 
-// // DownloadResults will write the latest query results to the filesystem
+// DownloadResults will write the latest query results to the filesystem
 func (c *Client) DownloadResults(q Query, filelocation, filetype string) (err error) {
 	if filetype == "" {
 		filetype = "xlsx"
@@ -91,4 +121,8 @@ func (c *Client) DownloadResults(q Query, filelocation, filetype string) (err er
 		return err
 	}
 	return nil
+}
+
+func (q *Query) String() string {
+	return fmt.Sprintf("%d\t%s\t%s\t%s", q.ID, q.Name, q.User.Name, q.RetrievedAt)
 }

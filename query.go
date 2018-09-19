@@ -5,35 +5,37 @@ import "strconv"
 
 // Query is returned for all /api/queries
 type Query struct {
-	DataSourceID      int     `json:"data_source_id"`
-	LastModifiedByID  int     `json:"last_modified_by_id"`
-	LatestQueryDataID int     `json:"latest_query_data_id"`
-	Schedule          string  `json:"schedule"`
-	IsArchived        bool    `json:"is_archived"`
-	RetrievedAt       string  `json:"retrieved_at"`
-	UpdatedAt         string  `json:"updated_at"`
-	User              User    `json:"user"`
-	Query             string  `json:"query"`
-	IsDraft           bool    `json:"is_draft"`
-	ID                int     `json:"id"`
-	Description       string  `json:"description"`
-	Runtime           float64 `json:"runtime"`
-	Name              string  `json:"name"`
-	CreatedAt         string  `json:"created_at"`
-	Version           int     `json:"version"`
-	QueryHash         string  `json:"query_hash"`
-	APIKey            string  `json:"api_key"`
+	Message           string  `json:"message,omitempty"`
+	DataSourceID      int     `json:"data_source_id,omitempty"`
+	LastModifiedByID  int     `json:"last_modified_by_id,omitempty"`
+	LatestQueryDataID int     `json:"latest_query_data_id,omitempty"`
+	Schedule          string  `json:"schedule,omitempty"`
+	IsArchived        bool    `json:"is_archived",omitempty`
+	RetrievedAt       string  `json:"retrieved_at,omitempty"`
+	UpdatedAt         string  `json:"updated_at,omitempty"`
+	User              User    `json:"user,omitempty"`
+	Query             string  `json:"query,omitempty"`
+	IsDraft           bool    `json:"is_draft,omitempty"`
+	ID                int     `json:"id,omitempty"`
+	Description       string  `json:"description,omitempty"`
+	Runtime           float64 `json:"runtime,omitempty"`
+	Name              string  `json:"name,omitempty"`
+	CreatedAt         string  `json:"created_at,omitempty"`
+	Version           int     `json:"version,omitempty"`
+	QueryHash         string  `json:"query_hash,omitempty"`
+	APIKey            string  `json:"api_key,omitempty"`
 	Options           struct {
 		Parameters []struct {
-			Global bool   `json:"global"`
-			Type   string `json:"type"`
-			Name   string `json:"name"`
-			Value  string `json:"value"`
-			Title  string `json:"title"`
-		} `json:"parameters"`
-	} `json:"options"`
+			Global bool        `json:"global,omitempty"`
+			Type   string      `json:"type,omitempty"`
+			Name   string      `json:"name,omitempty"`
+			Value  interface{} `json:"value,omitempty"`
+			Title  string      `json:"title,omitempty"`
+		} `json:"parameters,omitempty"`
+	} `json:"options,omitempty"`
 }
 
+// ListQueriesResponse represents the API response to a ListQueries request
 type ListQueriesResponse struct {
 	Count    int     `json:"count"`
 	Page     int     `json:"page"`
@@ -41,14 +43,20 @@ type ListQueriesResponse struct {
 	Results  []Query `json:"results"`
 }
 
-// ListQueries does that
+// ListQueries returns all Redash queries in a single slice
+// see ListQueriesWithPagination for a paginated option
 func (c *Client) ListQueries() (queries []Query, err error) {
-	var p ListQueriesResponse
 	var total = 1
+	var page = 1
 
 	for len(queries) < total {
+		p := ListQueriesResponse{}
 
-		req, err := c.newRequest("GET", "/api/queries", nil, nil)
+		req, err := c.newRequest("GET", "/api/queries", nil, &map[string]string{
+			"page":      fmt.Sprintf("%d", page),
+			"page_size": fmt.Sprintf("%d", 25),
+		})
+
 		if err != nil {
 			return queries, err
 		}
@@ -57,31 +65,47 @@ func (c *Client) ListQueries() (queries []Query, err error) {
 			return queries, err
 		}
 		total = p.Count
+		page++
 		queries = append(queries, p.Results...)
-		fmt.Println(len(queries))
 	}
 	return queries, nil
 }
 
-func (c *Client) ListQueriesWithPagination() (queries []Query, err error) {
-	var p ListQueriesResponse
-	var total = 1
-
-	for len(queries) < total {
-
-		req, err := c.newRequest("GET", "/api/queries", nil, nil)
-		if err != nil {
-			return queries, err
-		}
-		_, err = c.do(req, &p)
-		if err != nil {
-			return queries, err
-		}
-		total = p.Count
-		queries = append(queries, p.Results...)
-		fmt.Println(len(queries))
+// CreateQuery creates a query
+func (c *Client) CreateQuery(q Query) (Query, error) {
+	req, err := c.newRequest("POST", fmt.Sprintf("/api/queries"), q, nil)
+	if err != nil {
+		return q, err
 	}
-	return queries, nil
+	_, err = c.do(req, &q)
+	if q.Message != "" {
+		return q, fmt.Errorf("Error Creating Query: %s", q.Message)
+	}
+
+	return q, err
+}
+
+func (c *Client) DeleteQuery(q Query) (err error) {
+	req, err := c.newRequest("DELETE", fmt.Sprintf("/api/queries/%d", q.ID), nil, nil)
+	if err != nil {
+		return err
+	}
+	_, err = c.do(req, nil)
+	return err
+}
+
+// ListQueriesWithPagination returns the paginated ListQueriesResponse
+func (c *Client) ListQueriesWithPagination(options *map[string]string) (p ListQueriesResponse, err error) {
+
+	req, err := c.newRequest("GET", "/api/queries", nil, options)
+	if err != nil {
+		return p, err
+	}
+	_, err = c.do(req, &p)
+	if err != nil {
+		return p, err
+	}
+	return p, nil
 }
 
 // SearchQueries searches Redash for queries

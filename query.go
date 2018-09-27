@@ -2,28 +2,29 @@ package redash
 
 import "fmt"
 import "strconv"
+import "time"
 
 // Query is returned for all /api/queries
 type Query struct {
-	Message           string  `json:"message,omitempty"`
-	DataSourceID      int     `json:"data_source_id,omitempty"`
-	LastModifiedByID  int     `json:"last_modified_by_id,omitempty"`
-	LatestQueryDataID int     `json:"latest_query_data_id,omitempty"`
-	Schedule          string  `json:"schedule,omitempty"`
-	IsArchived        bool    `json:"is_archived",omitempty`
-	RetrievedAt       string  `json:"retrieved_at,omitempty"`
-	UpdatedAt         string  `json:"updated_at,omitempty"`
-	User              User    `json:"user,omitempty"`
-	Query             string  `json:"query,omitempty"`
-	IsDraft           bool    `json:"is_draft,omitempty"`
-	ID                int     `json:"id,omitempty"`
-	Description       string  `json:"description,omitempty"`
-	Runtime           float64 `json:"runtime,omitempty"`
-	Name              string  `json:"name,omitempty"`
-	CreatedAt         string  `json:"created_at,omitempty"`
-	Version           int     `json:"version,omitempty"`
-	QueryHash         string  `json:"query_hash,omitempty"`
-	APIKey            string  `json:"api_key,omitempty"`
+	Message           string    `json:"message,omitempty"`
+	DataSourceID      int       `json:"data_source_id,omitempty"`
+	LastModifiedByID  int       `json:"last_modified_by_id,omitempty"`
+	LatestQueryDataID int       `json:"latest_query_data_id,omitempty"`
+	Schedule          string    `json:"schedule,omitempty"`
+	IsArchived        bool      `json:"is_archived,omitempty"`
+	RetrievedAt       time.Time `json:"retrieved_at,omitempty"`
+	UpdatedAt         time.Time `json:"updated_at,omitempty"`
+	User              User      `json:"user,omitempty"`
+	Query             string    `json:"query,omitempty"`
+	IsDraft           bool      `json:"is_draft,omitempty"`
+	ID                int       `json:"id,omitempty"`
+	Description       string    `json:"description,omitempty"`
+	Runtime           float64   `json:"runtime,omitempty"`
+	Name              string    `json:"name,omitempty"`
+	CreatedAt         time.Time `json:"created_at,omitempty"`
+	Version           int       `json:"version,omitempty"`
+	QueryHash         string    `json:"query_hash,omitempty"`
+	APIKey            string    `json:"api_key,omitempty"`
 	Options           struct {
 		Parameters []struct {
 			Global bool        `json:"global,omitempty"`
@@ -92,6 +93,16 @@ func (c *Client) DeleteQuery(q Query) (err error) {
 	}
 	_, err = c.do(req, nil)
 	return err
+}
+
+// GetQueryByID returns Query
+func (c *Client) GetQueryByID(i int) (q *Query, err error) {
+	req, err := c.newRequest("GET", fmt.Sprintf("/api/queries/%d", i), nil, nil)
+	if err != nil {
+		return q, err
+	}
+	_, err = c.do(req, &q)
+	return q, err
 }
 
 // ListQueriesWithPagination returns the paginated ListQueriesResponse

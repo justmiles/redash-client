@@ -158,6 +158,39 @@ func (c *Client) DownloadResults(q Query, filelocation, filetype string) (err er
 	return nil
 }
 
+// RefreshQuery refreshes a query
+func (c *Client) RefreshQuery(q *Query) (j Job, err error) {
+	var jr JobResponse
+	req, err := c.newRequest("POST", fmt.Sprintf("/api/queries/%d/refresh", q.ID), nil, nil)
+	if err != nil {
+		return j, err
+	}
+
+	_, err = c.do(req, &jr)
+	if err != nil {
+		return j, err
+	}
+
+	return jr.Job, err
+}
+
+// RefreshQueryWait execute's a query and waits polls for the response before returning
+func (c *Client) RefreshQueryWait(q *Query, interval int) (*Query, error) {
+	job, err := c.RefreshQuery(q)
+	if err != nil {
+		return q, err
+	}
+
+	err = job.Poll(c, interval)
+	if err != nil {
+		return q, err
+	}
+
+	updatedQuery, err := c.GetQueryByID(q.ID)
+	return updatedQuery, err
+
+}
+
 func (q *Query) String() string {
 	return fmt.Sprintf("%d\t%s\t%s\t%s", q.ID, q.Name, q.User.Name, q.RetrievedAt)
 }

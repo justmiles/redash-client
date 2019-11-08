@@ -1,31 +1,39 @@
 package redash
 
-import "fmt"
-import "strconv"
-import "time"
+import (
+	"fmt"
+	"strconv"
+	"time"
+)
 
 // Query is returned for all /api/queries
 type Query struct {
-	Message           string    `json:"message,omitempty"`
-	DataSourceID      int       `json:"data_source_id,omitempty"`
-	LastModifiedByID  int       `json:"last_modified_by_id,omitempty"`
-	LatestQueryDataID int       `json:"latest_query_data_id,omitempty"`
-	Schedule          string    `json:"schedule,omitempty"`
-	IsArchived        bool      `json:"is_archived,omitempty"`
-	RetrievedAt       time.Time `json:"retrieved_at,omitempty"`
-	UpdatedAt         time.Time `json:"updated_at,omitempty"`
-	User              User      `json:"user,omitempty"`
-	Query             string    `json:"query,omitempty"`
-	IsDraft           bool      `json:"is_draft,omitempty"`
-	ID                int       `json:"id,omitempty"`
-	Description       string    `json:"description,omitempty"`
-	Runtime           float64   `json:"runtime,omitempty"`
-	Name              string    `json:"name,omitempty"`
-	CreatedAt         time.Time `json:"created_at,omitempty"`
-	Version           int       `json:"version,omitempty"`
-	QueryHash         string    `json:"query_hash,omitempty"`
-	APIKey            string    `json:"api_key,omitempty"`
-	Options           struct {
+	Message           string `json:"message,omitempty"`
+	DataSourceID      int    `json:"data_source_id,omitempty"`
+	LastModifiedByID  int    `json:"last_modified_by_id,omitempty"`
+	LatestQueryDataID int    `json:"latest_query_data_id,omitempty"`
+	Schedule          struct {
+		Interval  float64     `json:"interval,omitempty"`
+		Until     string      `json:"until,omitempty"`
+		DayOfWeek string      `json:"name,omitempty"`
+		Value     interface{} `json:"day_of_week,omitempty"`
+		Time      time.Time   `json:"time,omitempty"`
+	} `json:"parameters,omitempty"`
+	IsArchived  bool      `json:"is_archived,omitempty"`
+	RetrievedAt time.Time `json:"retrieved_at,omitempty"`
+	UpdatedAt   time.Time `json:"updated_at,omitempty"`
+	User        `json:"user,omitempty"`
+	Query       string    `json:"query,omitempty"`
+	IsDraft     bool      `json:"is_draft,omitempty"`
+	ID          int       `json:"id,omitempty"`
+	Description string    `json:"description,omitempty"`
+	Runtime     float64   `json:"runtime,omitempty"`
+	Name        string    `json:"name,omitempty"`
+	CreatedAt   time.Time `json:"created_at,omitempty"`
+	Version     int       `json:"version,omitempty"`
+	QueryHash   string    `json:"query_hash,omitempty"`
+	APIKey      string    `json:"api_key,omitempty"`
+	Options     struct {
 		Parameters []struct {
 			Global bool        `json:"global,omitempty"`
 			Type   string      `json:"type,omitempty"`

@@ -1,8 +1,11 @@
 package redash
 
-import "fmt"
-import "time"
-import prettyTime "github.com/andanhm/go-prettytime"
+import (
+	"fmt"
+	"time"
+
+	prettyTime "github.com/andanhm/go-prettytime"
+)
 
 // JobResponse represents responses from the API for Job objects
 type JobResponse struct {
@@ -29,11 +32,13 @@ func (j *Job) Poll(client *Client, i int) error {
 		if j.Error != "" {
 			return fmt.Errorf("%s", j.Error)
 		}
-		if j.Status == 2 {
-			fmt.Printf("Job is running. Started %s", prettyTime.Format(now))
+
+		if j.Status == 2 && client.DebugEnabled {
+			fmt.Printf("Job is running. Started %s\n", prettyTime.Format(now))
 		}
+
 		if j.Status == 3 {
-			fmt.Print("Job is has finished")
+			fmt.Println("Job is has finished")
 			return nil
 		}
 		time.Sleep(time.Second * time.Duration(i))

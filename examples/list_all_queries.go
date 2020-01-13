@@ -1,6 +1,6 @@
 package main
 
-import "github.com/justmiles/redash"
+import ""github.com/justmiles/redash-client"
 import "fmt"
 import "os"
 

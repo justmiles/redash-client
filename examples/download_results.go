@@ -1,8 +1,11 @@
 package main
 
-import "github.com/justmiles/redash-client"
-import "fmt"
-import "os"
+import (
+	"fmt"
+	"os"
+
+	"github.com/justmiles/redash-client"
+)
 
 // set REDASH_URL and REDASH_API_KEY
 

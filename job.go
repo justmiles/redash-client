@@ -36,6 +36,9 @@ func (j *Job) Poll(client *Client, i int) error {
 		if j.Status == 2 && client.DebugEnabled {
 			fmt.Printf("Job is running. Started %s\n", prettyTime.Format(now))
 		}
+		if j.Status == 2 {
+			fmt.Printf("Job is running. Started %s\n", prettyTime.Format(now))
+		}
 
 		if j.Status == 3 {
 			fmt.Println("Job is has finished")

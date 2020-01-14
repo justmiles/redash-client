@@ -2,6 +2,7 @@ github.com/andanhm/go-prettytime v1.0.0 h1:4pweu5nz0fQrDjePi4/sJp/r60Vzt5M7hoj7G
 github.com/andanhm/go-prettytime v1.0.0/go.mod h1:1JUUzhaE67n9bsj5Cx5Al4MVd0yft7NZgSA/qaRN408=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/justmiles/redash v8.0.0+incompatible h1:cvQ9PM+QEC68ilJSZ4meWXffso8apD2RZO3vj6Eigcs=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sqs/goreturns v0.0.0-20180302073349-83e02874ec12/go.mod h1:CKI4AZ4XmGV240rTHfO0hfE83S6/a3/Q1siZJ/vXf7A=

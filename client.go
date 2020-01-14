@@ -76,6 +76,8 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+	// logRawHTTPBody(resp.Body)
+
 	if v != nil {
 		err = json.NewDecoder(resp.Body).Decode(v)
 	}

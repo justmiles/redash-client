@@ -8,32 +8,18 @@ import (
 
 // Query is returned for all /api/queries
 type Query struct {
-	Message           string `json:"message,omitempty"`
-	DataSourceID      int    `json:"data_source_id,omitempty"`
-	LastModifiedByID  int    `json:"last_modified_by_id,omitempty"`
-	LatestQueryDataID int    `json:"latest_query_data_id,omitempty"`
-	Schedule          struct {
+	User           `json:"user,omitempty"`
+	Visualizations `json:"visualizations,omitempty"`
+
+	Schedule struct {
 		Interval  float64     `json:"interval,omitempty"`
 		Until     string      `json:"until,omitempty"`
 		DayOfWeek string      `json:"name,omitempty"`
 		Value     interface{} `json:"day_of_week,omitempty"`
 		Time      time.Time   `json:"time,omitempty"`
 	} `json:"parameters,omitempty"`
-	IsArchived  bool      `json:"is_archived,omitempty"`
-	RetrievedAt time.Time `json:"retrieved_at,omitempty"`
-	UpdatedAt   time.Time `json:"updated_at,omitempty"`
-	User        `json:"user,omitempty"`
-	Query       string    `json:"query,omitempty"`
-	IsDraft     bool      `json:"is_draft,omitempty"`
-	ID          int       `json:"id,omitempty"`
-	Description string    `json:"description,omitempty"`
-	Runtime     float64   `json:"runtime,omitempty"`
-	Name        string    `json:"name,omitempty"`
-	CreatedAt   time.Time `json:"created_at,omitempty"`
-	Version     int       `json:"version,omitempty"`
-	QueryHash   string    `json:"query_hash,omitempty"`
-	APIKey      string    `json:"api_key,omitempty"`
-	Options     struct {
+
+	Options struct {
 		Parameters []struct {
 			Global bool        `json:"global,omitempty"`
 			Type   string      `json:"type,omitempty"`
@@ -42,6 +28,27 @@ type Query struct {
 			Title  string      `json:"title,omitempty"`
 		} `json:"parameters,omitempty"`
 	} `json:"options,omitempty"`
+
+	Message           string    `json:"message,omitempty"`
+	DataSourceID      int       `json:"data_source_id,omitempty"`
+	LastModifiedByID  int       `json:"last_modified_by_id,omitempty"`
+	LatestQueryDataID int       `json:"latest_query_data_id,omitempty"`
+	IsArchived        bool      `json:"is_archived,omitempty"`
+	RetrievedAt       time.Time `json:"retrieved_at,omitempty"`
+	UpdatedAt         time.Time `json:"updated_at,omitempty"`
+	Query             string    `json:"query,omitempty"`
+	IsDraft           bool      `json:"is_draft,omitempty"`
+	ID                int       `json:"id,omitempty"`
+	Description       string    `json:"description,omitempty"`
+	Runtime           float64   `json:"runtime,omitempty"`
+	Name              string    `json:"name,omitempty"`
+	CreatedAt         time.Time `json:"created_at,omitempty"`
+	Version           int       `json:"version,omitempty"`
+	QueryHash         string    `json:"query_hash,omitempty"`
+	APIKey            string    `json:"api_key,omitempty"`
+	IsFavorite        bool      `json:"is_favorite,omitempty"`
+	Tags              []string  `json:"tags,omitempty"`
+	IsSafe            bool      `json:"is_safe,omitempty"`
 }
 
 // ListQueriesResponse represents the API response to a ListQueries request
@@ -128,23 +135,40 @@ func (c *Client) ListQueriesWithPagination(options *map[string]string) (p ListQu
 }
 
 // SearchQueries searches Redash for queries
-// q - query to search Form
-// drafts - boolean whether or not to include drafts
-func (c *Client) SearchQueries(q string, drafts bool) (p []Query, err error) {
+// q - query to search
+// includeDrafts - boolean whether or not to include drafts
+func (c *Client) SearchQueries(q string, includeDrafts bool, maxResults int) (queries []Query, err error) {
+	var (
+		page  = 1
+		total = 1
+	)
 
-	req, err := c.newRequest("GET", "/api/queries/search", nil, &map[string]string{
-		"q":              q,
-		"include_drafts": strconv.FormatBool(drafts),
-	})
+	for len(queries) < total && len(queries) < maxResults {
+		p := ListQueriesResponse{}
 
-	if err != nil {
-		return p, err
+		req, err := c.newRequest("GET", "/api/queries/search", nil, &map[string]string{
+			"page":           fmt.Sprintf("%d", page),
+			"page_size":      fmt.Sprintf("%d", 25),
+			"q":              q,
+			"include_drafts": strconv.FormatBool(includeDrafts),
+		})
+
+		if err != nil {
+			return queries, err
+		}
+		_, err = c.do(req, &p)
+		if err != nil {
+			return queries, err
+		}
+		total = p.Count
+		page++
+		queries = append(queries, p.Results...)
 	}
-	_, err = c.do(req, &p)
-	if err != nil {
-		return p, err
+
+	if len(queries) > maxResults {
+		queries = queries[0:maxResults]
 	}
-	return p, nil
+	return queries, nil
 }
 
 // DownloadResults will write the latest query results to the filesystem

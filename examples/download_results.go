@@ -1,8 +1,11 @@
 package main
 
-import "github.com/justmiles/redash-client"
-import "fmt"
-import "os"
+import (
+	"fmt"
+	"os"
+
+	"github.com/justmiles/redash-client"
+)
 
 // set REDASH_URL and REDASH_API_KEY
 
@@ -14,7 +17,7 @@ func main() {
 	}
 
 	// Search for a query
-	queries, err := client.SearchQueries("Traffic to HBase", false)
+	queries, err := client.SearchQueries("Traffic to HBase", false, 100)
 	if err != nil {
 		fmt.Println(err)
 		return
